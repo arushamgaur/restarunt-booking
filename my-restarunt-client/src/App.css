@@ -32,3 +32,8 @@ header{
     gap: 1rem; /* Adjust the gap between items as needed */
   }
   
+  .active{
+    text-decoration: underline;
+    text-underline-offset: 5px;
+    color: #39DB4A;
+  }

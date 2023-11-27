@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Cards from '../../components/Cards';
+import { FaFilter } from 'react-icons/fa';
 
 const Menu = () => {
 
@@ -10,6 +11,10 @@ const Menu = () => {
     const [selectedCategory, setSelectedCategory] = useState("all");
 
     const [sortOption, setSortOption] = useState("default");
+
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const [itemPerPage] = useState(9);
 
     //loading data
 
@@ -37,12 +42,14 @@ const Menu = () => {
 
         setFilteredItems(filtered);
         setSelectedCategory(category);
+        setCurrentPage(1);
       };
 
       //show all data
       const showAll = () => {
         setFilteredItems(menu);
         setSelectedCategory("all");
+        setCurrentPage(1);
       }
 
       //sorting based on A-Z, Z-A, Low to High Pricing
@@ -71,7 +78,15 @@ const Menu = () => {
           }
 
           setFilteredItems(sortedItems);
+          setCurrentPage(1);
       }
+
+      // pagination logic
+      const indexOfLastItem = currentPage * itemPerPage;
+      const indexOfFirstItem = indexOfLastItem - itemPerPage;
+      const currentItem = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+      const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
 
     return (
         <div>
@@ -92,18 +107,59 @@ const Menu = () => {
             {/* menu shop section */}
             <div className='section-container'>
                 {/* filtering and sorting */}
-                <div>
+                <div className='flex flex-col md:flex-row flex-wrap md:justify-between items-center space-y-3 mb-8'>
                     {/* btns */}
+                    <div className='flex flex-row justify-start md:items-center md:gap-8 gap-4 text-black flex-wrap'>
+                        <button onClick={showAll}
+                        className={selectedCategory === "all" ? "active" : ""}
+                        >All</button>
+                        <button onClick={() => filterItems("salad")} className={selectedCategory === "salad" ? "active" : ""}>Salad</button>
+                        <button onClick={() => filterItems("pizza")} className={selectedCategory === "pizza" ? "active" : ""}>Pizza</button>
+                        <button onClick={() => filterItems("soup")} className={selectedCategory === "soup" ? "active" : ""}>Soups</button>
+                        <button onClick={() => filterItems("dessert")} className={selectedCategory === "dessert" ? "active" : ""}>Desserts</button>
+                        <button onClick={() => filterItems("drinks")} className={selectedCategory === "drinks" ? "active" : ""}>Drinks</button>
+                    </div>
+                </div>
+
+                {/* filter */}
+                <div className='flex justify-end mb-4 rounded-sm'>
+                    <div className='bg-white p-2'>
+                        <FaFilter className='text-black h-4 w-4 '/>
+                    </div>
+                    {/* sorting options */}
+                    <select name="sort" id="sort"
+                    onChange={(e) => handleSortChange(e.target.value)} value={sortOption}
+                    className='bg-white text-black px-2 py-1 rounded-sm'
+                    >
+                        <option value="default">Default</option>
+                        <option value="A-Z">A-Z</option>
+                        <option value="Z-A">Z-A</option>
+                        <option value="low-to-high">low-to-high</option>
+                        <option value="high-to-low">high-to-low</option>
+                    </select>
                 </div>
 
                 {/* products card */}
                 <div className='grid md:grid-cols-4 sm:grid-cols-2 grid-cols-1 gap-4'>
                     {
-                        filteredItems.map((item) => (
+                        currentItem.map((item) => (
                             <Cards key={item._id} item={item}/>
                         ))
                     }
                 </div>
+            </div>
+
+            {/* pagination section */}
+            <div className='flex justify-center my-8'>
+                {
+                    Array.from({length: Math.ceil(filteredItems.length / itemPerPage)}).map((_, index) => (
+                        <button key={index + 1} onClick={() => paginate(index + 1)}
+                        className={`mx-1 px-3 py-1 rounded-full ${currentPage === index + 1 ? "bg-green text-white" : "bg-gray-200"}`}
+                        >
+                            {index + 1}
+                        </button>
+                    ))
+                }
             </div>
         </div>
     )
